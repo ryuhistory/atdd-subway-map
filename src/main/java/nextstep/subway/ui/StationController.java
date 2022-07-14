@@ -1,7 +1,6 @@
 package nextstep.subway.ui;
 
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import nextstep.subway.applicaion.StationService;
 import nextstep.subway.applicaion.dto.StationRequest;
 import nextstep.subway.applicaion.dto.StationResponse;
+import nextstep.subway.common.response.CommonResponse;
 
 @RestController
 public class StationController {
@@ -24,19 +24,19 @@ public class StationController {
 	}
 
 	@PostMapping("/stations")
-	public ResponseEntity<StationResponse> createStation(@RequestBody StationRequest stationRequest) {
+	public ResponseEntity<CommonResponse> createStation(@RequestBody StationRequest stationRequest) {
 		StationResponse station = stationService.saveStation(stationRequest);
-		return ResponseEntity.created(URI.create("/stations/" + station.getId())).body(station);
+		return ResponseEntity.created(URI.create("/stations/" + station.getId())).body(CommonResponse.success(station));
 	}
 
 	@GetMapping(value = "/stations")
-	public ResponseEntity<List<StationResponse>> showStations() {
-		return ResponseEntity.ok().body(stationService.findAllStations());
+	public ResponseEntity<CommonResponse> showStations() {
+		return ResponseEntity.ok().body(CommonResponse.success(stationService.findAllStations()));
 	}
 
 	@DeleteMapping("/stations/{id}")
-	public ResponseEntity<Void> deleteStation(@PathVariable Long id) {
+	public ResponseEntity<CommonResponse> deleteStation(@PathVariable Long id) {
 		stationService.deleteStationById(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(CommonResponse.success());
 	}
 }

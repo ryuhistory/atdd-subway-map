@@ -1,7 +1,6 @@
 package nextstep.subway.ui;
 
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import nextstep.subway.applicaion.LineService;
 import nextstep.subway.applicaion.dto.LineRequest;
 import nextstep.subway.applicaion.dto.LineResponse;
+import nextstep.subway.common.response.CommonResponse;
 
 @RestController
 public class LineController {
@@ -25,31 +25,32 @@ public class LineController {
 	}
 
 	@PostMapping("/lines")
-	public ResponseEntity<LineResponse> createLine(@RequestBody LineRequest LineRequest) {
+	public ResponseEntity<CommonResponse> createLine(@RequestBody LineRequest LineRequest) {
 		LineResponse LineResponse = lineService.createLines(LineRequest);
-		return ResponseEntity.created(URI.create("/lines/" + LineResponse.getId())).body(LineResponse);
+		return ResponseEntity.created(URI.create("/lines/" + LineResponse.getId()))
+			.body(CommonResponse.success(LineResponse));
 	}
 
 	@GetMapping(value = "/lines")
-	public ResponseEntity<List<LineResponse>> showAllStationsLines() {
-		return ResponseEntity.ok().body(lineService.findAllLines());
+	public ResponseEntity<CommonResponse> showAllStationsLines() {
+		return ResponseEntity.ok().body(CommonResponse.success(lineService.findAllLines()));
 	}
 
 	@GetMapping("/lines/{id}")
-	public ResponseEntity<LineResponse> showLine(@PathVariable Long id) {
-		return ResponseEntity.ok().body(lineService.findLine(id));
+	public ResponseEntity<CommonResponse> showLine(@PathVariable Long id) {
+		return ResponseEntity.ok().body(CommonResponse.success(lineService.findLine(id)));
 	}
 
 	@PutMapping("/lines/{id}")
-	public ResponseEntity<Void> updateLine(@PathVariable Long id,
+	public ResponseEntity<CommonResponse> updateLine(@PathVariable Long id,
 		@RequestBody LineRequest LineRequest) {
 		lineService.updateLine(id, LineRequest);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(CommonResponse.success());
 	}
 
 	@DeleteMapping("/lines/{id}")
-	public ResponseEntity<Void> deleteLine(@PathVariable Long id) {
+	public ResponseEntity<CommonResponse> deleteLine(@PathVariable Long id) {
 		lineService.deleteLine(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(CommonResponse.success());
 	}
 }

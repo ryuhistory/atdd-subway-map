@@ -88,7 +88,7 @@ public class StationAcceptanceTest extends AcceptanceTest {
 			.then().log().all()
 			.statusCode(HttpStatus.CREATED.value())
 			.extract()
-			.jsonPath().getLong("id");
+			.jsonPath().getLong("data.id");
 
 	}
 
@@ -97,13 +97,13 @@ public class StationAcceptanceTest extends AcceptanceTest {
 			.when().get("/stations")
 			.then().log().all()
 			.statusCode(HttpStatus.OK.value())
-			.extract().jsonPath().getList("name", String.class);
+			.extract().jsonPath().getList("data.name", String.class);
 	}
 
 	private void 지하철역_삭제(long stationId) {
 		RestAssured.given().log().all()
 			.when().delete("/stations/" + stationId)
 			.then().log().all()
-			.statusCode(HttpStatus.NO_CONTENT.value());
+			.statusCode(HttpStatus.OK.value());
 	}
 }

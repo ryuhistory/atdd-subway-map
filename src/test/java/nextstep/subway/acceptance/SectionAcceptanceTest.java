@@ -53,8 +53,8 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 		//given
 
 		//when
-		int sectionId = (int)지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED,
-			"sectionId");
+		int sectionId = 지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1,
+			HttpStatus.CREATED).jsonPath().get("data.sectionId");
 		//then
 		assertTrue(등록된_구간정보와_조회된_구간정보_일치여부(sectionId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1));
 
@@ -69,11 +69,12 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 	@Test
 	void createSectionErrorCase1() {
 		//when
-		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED, "sectionId");
+		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED);
 
 		//then
 		assertEquals("INVALID_STATUS",
-			지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.OK, "errorCode"));
+			지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.OK).jsonPath()
+				.get("errorCode"));
 	}
 
 	/**
@@ -87,11 +88,12 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 		//given
 
 		//when
-		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED, "sectionId");
+		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED);
 
 		//then
 		assertEquals("INVALID_STATUS",
-			지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.OK, "errorCode"));
+			지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.OK).jsonPath()
+				.get("errorCode"));
 	}
 
 	/**
@@ -105,10 +107,10 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 		//given
 
 		//when
-		int section1 = (int)지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED,
-			"sectionId");
-		int section2 = (int)지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_2, DISTANCE_2, HttpStatus.CREATED,
-			"sectionId");
+		int section1 = 지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED)
+			.jsonPath().get("data.sectionId");
+		int section2 = 지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_2, DISTANCE_2, HttpStatus.CREATED)
+			.jsonPath().get("data.sectionId");
 
 		//then
 		assertThat(지하철_구간_목록_조회(lineId)).hasSize(2)
@@ -126,10 +128,11 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 		//given
 
 		//when
-		long sectionId = (int)지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED,
-			"sectionId");
+		int sectionId = 지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED)
+			.jsonPath().get("data.sectionId");
 		//then
-		assertEquals(지하철_구간_조회_BY_ID(sectionId, HttpStatus.OK).get("sectionId"), (int)sectionId);
+		assertEquals((int)지하철_구간_조회_BY_ID(sectionId, HttpStatus.OK).jsonPath().get("data.sectionId"), sectionId);
+
 	}
 
 	/**
@@ -143,13 +146,14 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 	void deleteSection() {
 		//given
 
-		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED, "sectionId");
-		long sectionId = (int)지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_2, DISTANCE_2, HttpStatus.CREATED,
-			"sectionId");
+		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED);
+		int sectionId = 지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_2, DISTANCE_2, HttpStatus.CREATED)
+			.jsonPath().get("data.sectionId");
 		//when
 		지하철_구간_삭제(lineId, DOWN_STATION_ID_2);
 		//then
-		assertEquals(ENTITY_NOT_FOUND.toString(), 지하철_구간_조회_BY_ID(sectionId, HttpStatus.OK).get("errorCode"));
+		assertEquals(ENTITY_NOT_FOUND.toString(),
+			지하철_구간_조회_BY_ID(sectionId, HttpStatus.OK).jsonPath().get("errorCode"));
 	}
 
 	/**
@@ -164,11 +168,11 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 		//given
 
 		//when
-		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED, "sectionId");
-		지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_2, DISTANCE_2, HttpStatus.CREATED, "sectionId");
+		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED);
+		지하철_구간_생성(lineId, UP_STATION_ID_2, DOWN_STATION_ID_2, DISTANCE_2, HttpStatus.CREATED);
 
 		//then
-		assertEquals("INVALID_STATUS", 지하철_구간_삭제_응답(lineId, DOWN_STATION_ID_1));
+		assertEquals("INVALID_STATUS", 지하철_구간_삭제_응답(lineId, DOWN_STATION_ID_1).jsonPath().get("errorCode"));
 	}
 
 	/**
@@ -183,14 +187,14 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 		//given
 
 		//when
-		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED, "sectionId");
+		지하철_구간_생성(lineId, UP_STATION_ID_1, DOWN_STATION_ID_1, DISTANCE_1, HttpStatus.CREATED);
 
 		//then
-		assertEquals("INVALID_STATUS", 지하철_구간_삭제_응답(lineId, DOWN_STATION_ID_1));
+		assertEquals("INVALID_STATUS", 지하철_구간_삭제_응답(lineId, DOWN_STATION_ID_1).jsonPath().get("errorCode"));
 	}
 
-	private Object 지하철_구간_생성(long lineId, long upStationId, long downStationId, long distance, HttpStatus httpStatus,
-		String returnName) {
+	private ExtractableResponse 지하철_구간_생성(long lineId, long upStationId, long downStationId, long distance,
+		HttpStatus httpStatus) {
 		String postUrl = String.format("%s/%s/section", baseUrlPrefix, lineId);
 		return RestAssured.given().log().all()
 			.contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -198,7 +202,7 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 			.when().post(postUrl)
 			.then().log().all()
 			.statusCode(httpStatus.value())
-			.extract().jsonPath().get(returnName);
+			.extract();
 	}
 
 	private List<Integer> 지하철_구간_목록_조회(long lineId) {
@@ -207,18 +211,17 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 			.when().get(selectPath)
 			.then().log().all()
 			.statusCode(HttpStatus.OK.value())
-			.extract().jsonPath().getList("sectionId");
+			.extract().jsonPath().getList("data.sectionId");
 	}
 
-	private Map<String, Object> 지하철_구간_조회_BY_ID(long sectionId, HttpStatus httpStatus) {
+	private ExtractableResponse 지하철_구간_조회_BY_ID(long sectionId, HttpStatus httpStatus) {
 		String selectPath = String.format("%s/section/%s", baseUrlPrefix, sectionId);
-		ExtractableResponse extractableResponse = RestAssured.given().log().all()
+
+		return RestAssured.given().log().all()
 			.when().get(selectPath)
 			.then().log().all()
 			.statusCode(httpStatus.value())
 			.extract();
-
-		return extractableResponse.jsonPath().get();
 	}
 
 	private void 지하철_구간_삭제(long lineId, long stationId) {
@@ -226,16 +229,16 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 		RestAssured.given().log().all()
 			.when().delete(deleteUrl)
 			.then().log().all()
-			.statusCode(HttpStatus.NO_CONTENT.value());
+			.statusCode(HttpStatus.OK.value());
 	}
 
-	private String 지하철_구간_삭제_응답(long lineId, long stationId) {
+	private ExtractableResponse 지하철_구간_삭제_응답(long lineId, long stationId) {
 		String deleteUrl = String.format("%s/%s/section?stationId=%s", baseUrlPrefix, lineId, stationId);
 		return RestAssured.given().log().all()
 			.when().delete(deleteUrl)
 			.then().log().all()
 			.statusCode(HttpStatus.OK.value())
-			.extract().jsonPath().getString("errorCode");
+			.extract();
 	}
 
 	private Map<String, Object> 지하철_구간_생성_파라미터생성(long upStationId, long downStationId, long distance) {
@@ -249,7 +252,8 @@ public class SectionAcceptanceTest extends AcceptanceTest {
 	private boolean 등록된_구간정보와_조회된_구간정보_일치여부(int sectionId, int upStationId, int downStationId,
 		int distance) {
 
-		Map<String, Object> response = 지하철_구간_조회_BY_ID(sectionId, HttpStatus.OK);
+		Map<String, Object> response =
+			지하철_구간_조회_BY_ID(sectionId, HttpStatus.OK).jsonPath().get("data");
 
 		int registeredSectionId = (int)response.get("sectionId");
 		int registeredUpStationId = (int)response.get("upStationId");

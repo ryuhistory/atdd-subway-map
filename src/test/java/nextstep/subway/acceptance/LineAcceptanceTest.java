@@ -66,10 +66,10 @@ public class LineAcceptanceTest extends AcceptanceTest {
 		long stationId = 지하철_노선_생성(SIN_BOONDANG_LINE, LINE_COLOR_RED);
 
 		//when
-		Map<String, Object> response = 지하철_노선_조회_BY_ID(stationId, HttpStatus.OK);
+		ExtractableResponse response = 지하철_노선_조회_BY_ID(stationId, HttpStatus.OK);
 
 		//then
-		assertEquals(SIN_BOONDANG_LINE, response.get("name"));
+		assertEquals(SIN_BOONDANG_LINE, response.jsonPath().get("data.name"));
 	}
 
 	/**
@@ -87,9 +87,9 @@ public class LineAcceptanceTest extends AcceptanceTest {
 		지하철_노선_수정(stationId, SAMSUNG_STATION, LINE_COLOR_BLUE);
 
 		//then
-		Map<String, Object> response = 지하철_노선_조회_BY_ID(stationId, HttpStatus.OK);
-		assertEquals(SAMSUNG_STATION, response.get("name"));
-		assertEquals(LINE_COLOR_BLUE, response.get("color"));
+		ExtractableResponse response = 지하철_노선_조회_BY_ID(stationId, HttpStatus.OK);
+		assertEquals(SAMSUNG_STATION, response.jsonPath().get("data.name"));
+		assertEquals(LINE_COLOR_BLUE, response.jsonPath().get("data.color"));
 
 	}
 
@@ -108,8 +108,8 @@ public class LineAcceptanceTest extends AcceptanceTest {
 		지하철_노선_삭제(stationId);
 
 		//then
-		Map<String, Object> response = 지하철_노선_조회_BY_ID(stationId, HttpStatus.OK);
-		assertEquals(ENTITY_NOT_FOUND.toString(), response.get("errorCode"));
+		ExtractableResponse response = 지하철_노선_조회_BY_ID(stationId, HttpStatus.OK);
+		assertEquals(ENTITY_NOT_FOUND.toString(), response.jsonPath().get("errorCode"));
 
 	}
 
@@ -136,7 +136,7 @@ public class LineAcceptanceTest extends AcceptanceTest {
 			.then().log().all()
 			.statusCode(HttpStatus.CREATED.value())
 			.extract()
-			.jsonPath().getLong("id");
+			.jsonPath().getLong("data.id");
 	}
 
 	private void 지하철_노선_수정(long stationId, String stationName, String stationColor) {
@@ -145,14 +145,14 @@ public class LineAcceptanceTest extends AcceptanceTest {
 			.body(지하철라인_수정_파라미터생성(stationName, stationColor))
 			.when().put("/lines/" + stationId)
 			.then().log().all()
-			.statusCode(HttpStatus.NO_CONTENT.value());
+			.statusCode(HttpStatus.OK.value());
 	}
 
 	private void 지하철_노선_삭제(long stationId) {
 		RestAssured.given().log().all()
 			.when().delete("/lines/" + stationId)
 			.then().log().all()
-			.statusCode(HttpStatus.NO_CONTENT.value());
+			.statusCode(HttpStatus.OK.value());
 	}
 
 	private List<String> 지하철_노선_전체_조회() {
@@ -160,19 +160,15 @@ public class LineAcceptanceTest extends AcceptanceTest {
 			.when().get("/lines")
 			.then().log().all()
 			.statusCode(HttpStatus.OK.value())
-			.extract().jsonPath().getList("name", String.class);
+			.extract().jsonPath().getList("data.name", String.class);
 	}
 
-	private Map<String, Object> 지하철_노선_조회_BY_ID(Long id, HttpStatus httpStatus) {
+	private ExtractableResponse 지하철_노선_조회_BY_ID(Long id, HttpStatus httpStatus) {
 
-		ExtractableResponse response = RestAssured.given().log().all()
+		return RestAssured.given().log().all()
 			.when().get("/lines/" + id)
 			.then().log().all()
 			.statusCode(httpStatus.value())
 			.extract();
-		if (httpStatus == HttpStatus.NO_CONTENT) {
-			return null;
-		}
-		return response.jsonPath().get();
 	}
 }

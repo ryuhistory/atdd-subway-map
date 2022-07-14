@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SectionRepository extends JpaRepository<Section, Long> {
 	List<Section> findByLineIdOrderById(long lineId);
 
-	Optional<Section> findByDownStationId(long stationId);
+	Optional<Section> findByLineId(long lineId);
 
 }
