@@ -3,56 +3,94 @@ package nextstep.subway.domain;
 import static nextstep.subway.common.exception.errorcode.StatusErrorCode.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.util.CollectionUtils;
+import javax.persistence.CascadeType;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+
+import org.springframework.util.ObjectUtils;
 
 import nextstep.subway.common.exception.BusinessException;
 
 public class Sections {
-	private static final int MINIMUM_COUNT = 1;
-	private final List<Section> values;
 
-	public Sections(List<Section> sectionList) {
-		values = new ArrayList<>(sectionList);
+	@OneToMany(mappedBy = "line",
+		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+		orphanRemoval = true)
+	@OrderBy("id asc")
+	private List<Section> section = new ArrayList<>();
+
+	public Sections() {
 	}
 
-	public void validationOfRegistration(long addUpStationId, long addDownStationId) {
-		if (CollectionUtils.isEmpty(values)) {
+	public List<Section> getSectionList() {
+		return section;
+	}
+
+	public void add(Section newSection) {
+		System.out.println("1111");
+		nullValidation(newSection);
+		validationOfRegistration(newSection);
+		this.section
+			.add(newSection);
+	}
+
+	public void remove(Station station) {
+		nullValidation(station);
+		validationOfDelete(station);
+		section.removeIf(section -> section.getDownStation().getId() == station.getId());
+
+	}
+
+	public List<Station> getAllStationsBySection() {
+		List<Station> stations = new ArrayList<>();
+		section.forEach(station -> stations.addAll(station.getAllStations()));
+		return stations;
+	}
+
+	private void validationOfRegistration(Section newSection) {
+
+		if (this.section.size() <= 0) {
 			return;
 		}
 
-		//마지막 구간 종점과, 추가된 상행선은 같아야 한다.
-		if (getLastSection().getDownStationId() != addUpStationId) {
+		if (!getLastSection().isSameWithDownStation(newSection.getUpStation().getId())) {
 			throw new BusinessException(INVALID_STATUS);
 		}
 
-		//기존 구간에 등록된 역이면 안되용
-		if (values.stream()
-			.anyMatch(station -> station.getDownStationId() == addDownStationId
-				|| station.getUpStationId() == addDownStationId)) {
-			throw new BusinessException(INVALID_STATUS);
-		}
-	}
-
-	public void validationOfDelete(long stationId) {
-		if (CollectionUtils.isEmpty(values)) {
-			throw new BusinessException(INVALID_STATUS);
-		}
-		if (values.size() <= MINIMUM_COUNT) {
-			throw new BusinessException(INVALID_STATUS);
-		}
-
-		if (getLastSection().getDownStationId() != stationId) {
+		if (this.section
+			.stream()
+			.anyMatch(value -> value.isSameAnyOfStation(newSection.getDownStation().getId()))) {
 			throw new BusinessException(INVALID_STATUS);
 		}
 
 	}
 
-	public Section getLastSection() {
-		return values.stream()
-			.reduce((first, second) -> second)
-			.orElseThrow(IllegalStateException::new);
+	public void validationOfDelete(Station station) {
+
+		if (this.section.size() <= 1) {
+			throw new BusinessException(INVALID_STATUS);
+		}
+
+		if (!getLastSection().isSameWithDownStation(station.getId())) {
+			throw new BusinessException(INVALID_STATUS);
+		}
+
+	}
+
+	private void nullValidation(Object object) {
+		if (ObjectUtils.isEmpty(object)) {
+			throw new BusinessException(INVALID_STATUS);
+		}
+	}
+
+	private Section getLastSection() {
+		return this.section.stream()
+			.sorted(Comparator.comparing(Section::getId).reversed())
+			.findFirst()
+			.orElseThrow(() -> new BusinessException(INVALID_STATUS));
 	}
 
 }

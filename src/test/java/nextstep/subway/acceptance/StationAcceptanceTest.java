@@ -25,7 +25,7 @@ public class StationAcceptanceTest extends AcceptanceTest {
 	@Test
 	void createStation() {
 		// when
-		Long stationId = 지하철역_생성(SIN_BOONDANG_LINE);
+		int stationId = 지하철역_생성(SIN_BOONDANG_LINE);
 
 		// then
 		assertThat(stationId).isNotNull();
@@ -76,7 +76,7 @@ public class StationAcceptanceTest extends AcceptanceTest {
 		assertThat(stations).isEmpty();
 	}
 
-	private Long 지하철역_생성(String stationName) {
+	static int 지하철역_생성(String stationName) {
 
 		Map<String, String> searchParameter = new HashMap<>();
 		searchParameter.put("name", stationName);
@@ -88,7 +88,7 @@ public class StationAcceptanceTest extends AcceptanceTest {
 			.then().log().all()
 			.statusCode(HttpStatus.CREATED.value())
 			.extract()
-			.jsonPath().getLong("data.id");
+			.jsonPath().getInt("data.id");
 
 	}
 
